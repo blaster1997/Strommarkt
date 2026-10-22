@@ -53,3 +53,19 @@ allgemeine Agenten mit Verweis auf ihre Rollenbeschreibung beauftragt (`CLAUDE.m
 
 **Status:** umgesetzt
 
+## D-005 · 22.10.2026 · Agenda-Vorschlag (Phase 1) zur Freigabe vorgelegt
+
+**Anlass:** Abschluss der Phase 1 nach Abschnitt 2 und 12 des Auftrags.
+
+**Vorschlag:** `01_agenda/AGENDA_VORSCHLAG.md` (+ PDF): 30 Kapitel in neun Teilen nach der Schichtenlogik „von der
+Physik zum Preis“, innerhalb des Großhandels und der Systembilanz entlang der Zeitachse; gegenüber der vorläufigen
+Gliederung neu: Netzgrundlagen in Teil I (Kap. 3), Brennstoffe und CO₂ (Kap. 6), Handelsaufsicht (Kap. 11),
+Endkundenteil in drei Kapiteln (Kap. 25–27), Geschäftsmodelle und Investitionen (Kap. 29); Kap. 21 behandelt das
+EEG 2027 als Kerninhalt, Kap. 17 den Kapazitätsmechanismus in zwei Stufen, Kap. 23 die Festlegungsarchitektur ab
+2029. Richtwert 241.800 Wörter (Agenda-Wörter 186.000 × 1,3), rund 500 Seiten Kapiteltext. Parameter der
+Referenzfälle R1–R6 als Annahmen A-001 bis A-053 (Status „vorgeschlagen“). Probekapitel 8 und 20. Sieben
+Rückfragen (Umfang, Perspektive und Physik, Tiefe des Rechts, Vergleichsmärkte, Referenzfälle, Excel, Unterlagen
+und Daten).
+
+**Status:** offen – wartet auf Freigabe (STOP)
+

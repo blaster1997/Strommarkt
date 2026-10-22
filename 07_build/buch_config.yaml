@@ -1,0 +1,62 @@
+# Buchkonfiguration – die einzige Stelle für buchspezifische Angaben des Satzsystems.
+# Gelesen von buch.py, build.py, anhang_loesungen.py, offene_punkte.py, querverweise.py, stichwoerter.py,
+# glossar_merge.py und sources/kapitel_abgleichen.py. Layout (Farben, Schriften, Kästen) steht nur in
+# typst/lehrbuch.typst und wird hier nicht verändert.
+#
+# Pflege: Nach der Freigabe der Agenda (Phase 1) trägt der Orchestrator die Teile und Kapitel ein; vor jedem
+# Gesamtbuch-Build (Phase 7) setzt er „stand“, „datenstand“, „rechtsstand“ und die Deckblattzeilen.
+
+titel: "Der Strommarkt in Deutschland"
+untertitel: "Vom Strom selbst bis zum Netz: Physik, Großhandel, Systemsicherheit, Kapazität, Förderung, Regulierung und Preise"
+kurztitel: "Der Strommarkt in Deutschland"     # Kolumnentitel links (Kopfzeile jeder Seite)
+dateiname: "Lehrbuch_Strommarkt"            # Gesamtbuch → 07_build/output/<dateiname>.pdf
+
+stand: "TT.MM.JJJJ"            # Fassungsdatum (Deckblatt, Fußzeile, Verzeichnisse)
+datenstand: "TT.MM.JJJJ"       # Stichtag der Markt- und Modelldaten
+rechtsstand: "TT.MM.JJJJ"      # Stichtag der geprüften Rechtslage
+
+# Vorläufige Gliederung aus dem Auftrag; nach der Agenda-Freigabe (Phase 1) an AGENDA.md angleichen.
+teile:
+  - {nr: "I", titel: "Grundlagen: Strom, System und Akteure", kapitel: [1, 2, 3]}
+  - {nr: "II", titel: "Großhandel", kapitel: [4, 5, 6, 7, 8]}
+  - {nr: "III", titel: "Systembilanz und Systemsicherheit", kapitel: [9, 10, 11, 12]}
+  - {nr: "IV", titel: "Versorgungssicherheit und Kapazität", kapitel: [13, 14]}
+  - {nr: "V", titel: "Erneuerbare Energien und Förderung", kapitel: [15, 16, 17, 18]}
+  - {nr: "VI", titel: "Das Netz", kapitel: [19, 20, 21, 22]}
+  - {nr: "VII", titel: "Endkundenmarkt", kapitel: [23, 24]}
+  - {nr: "VIII", titel: "Europa", kapitel: [25]}
+  - {nr: "IX", titel: "Fallstudien", kapitel: [26]}
+
+deckblatt_info:
+  - "Lehrbuch: 26 Kapitel in neun Teilen, Anhänge A–H"
+  - "Datenstand: TT.MM.JJJJ; Rechtsstand TT.MM.JJJJ"
+  - "Referenzfälle: R1 Haushalt, R2 Industriekunde, R3 Windpark, R4 Solarpark mit PPA, R5 Gaskraftwerk, R6 Batteriespeicher"
+fusszeile_links: "Fassung vom TT.MM.JJJJ – keine Rechts-, Steuer- oder Anlageberatung"
+deckblatt_hinweis: "Fassung vom TT.MM.JJJJ. Keine Rechts-, Steuer- oder Anlageberatung. Vor einer Entscheidung sind die als beweglich gekennzeichneten Rechtsstände und Daten neu zu prüfen."
+hinweis_kurz: "Keine Rechts-, Steuer- oder Anlageberatung."   # Deckblatt des Lösungsanhangs
+
+# Vertrauliche Unterlagen des Auftraggebers (CLAUDE.md § 8): erscheinen im Quellenverzeichnis nur mit ihrer
+# Bezeichnung, ohne Titel, Herausgeber und URL. Beispiel für eine anonymisierte Unterlage:
+vertraulich: []
+#  - id: "U1-00"
+#    eintrag: "Unterlage U1 (anonymisiert), vertrauliche Unterlage des Auftraggebers; Verwendung der Zahlen mit Zustimmung des Auftraggebers"
+#    stand: "TT.MM.JJJJ"
+vertraulich_hinweis: ""        # Satz für die Einleitung des Quellenverzeichnisses, z. B. „Die Unterlage U1 ist …“
+
+# Quellen, die im Verzeichnis ohne Herausgeber und URL erscheinen (z. B. weil sie Rückschlüsse auf U1 erlauben)
+ohne_herausgeber: []
+
+# Kennungen, die keine Quellen-IDs sind (Prüfung in glossar_merge.py)
+interne_id_praefixe: ["U1", "S"]
+
+# Erläuterung der Qualitätsstufe A im Quellenverzeichnis
+qualitaet_a: "Gesetz, Gericht, Behörde, Netzbetreiber, Börse, amtliche Statistik"
+
+# Glossarbegriffe, die als Stichwort zu allgemein sind (nicht im Stichwortverzeichnis markieren)
+stichwort_zu_allgemein: [
+  "Strom", "Energie", "Leistung", "Markt", "Preis", "Preise", "Netz", "Anlage", "Anlagen", "Erzeugung", "Verbrauch",
+  "Kunde", "Kunden", "Handel", "Börse", "Vertrag", "Lieferung", "Kosten", "Wert", "Erlös", "Erlöse", "Betrieb",
+  "Speicher", "Projekt", "Modell", "Laufzeit", "Risiko", "Steuer", "Zins", "Rendite", "Kapital", "Investition",
+  "Option", "brutto", "netto", "nominal", "real", "Lücke", "Annahme", "Schätzung", "Fakt", "Quelle", "Stand",
+  "Kapitel", "Tabelle", "Abbildung", "Übung", "Lösung", "Bezug", "Einspeisung", "Anrechnung"
+]

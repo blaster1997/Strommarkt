@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.~lock.*#
+~$*
+07_build/output/
+*.tmp
+04_models/daten/roh/

@@ -1,0 +1,356 @@
+// Lehrbuch-Vorlage für Pandoc → Typst (Build v2, nur PDF); übernommen aus dem BESS-Projekt. Layoutänderungen nur hier.
+// Layout wie Build v1: Farben, Kästen, Tabellenstil, Deckblatt. Zusätzlich lebende
+// Kolumnentitel, native Nummerierung von Überschriften, Tabellen und Abbildungen.
+// Achtung: In Pandoc-Vorlagen muss ein wörtliches Dollarzeichen als $$ geschrieben werden.
+
+// ---------------------------------------------------------------------------
+// Gestaltungskonstanten
+// ---------------------------------------------------------------------------
+#let navy = rgb("#1B365D")
+#let akzent = rgb("#2A7AB0")
+#let textfarbe = rgb("#1A1A1A")
+#let grau = rgb("#5F6B7A")
+#let linie = rgb("#C9D3E0")
+#let band = rgb("#F3F6FA")
+#let serif = ("Caladea", "Libertinus Serif", "DejaVu Serif")
+#let sans = ("Carlito", "DejaVu Sans")
+#let mono = ("DejaVu Sans Mono",)
+
+#let kasten-farben = (
+  merke: (rgb("#2A7AB0"), rgb("#EAF2FA")),
+  fachleute: (rgb("#C55A11"), rgb("#FDF0E6")),
+  praxis: (rgb("#2E7D6B"), rgb("#E8F4F0")),
+  achtung: (rgb("#B7791F"), rgb("#FFF6E0")),
+  beispiel: (rgb("#1B365D"), rgb("#F1F3F6")),
+  lernziele: (rgb("#5B4B8A"), rgb("#F1EEF8")),
+  definition: (rgb("#5F6B7A"), rgb("#F5F6F8")),
+  stand: (rgb("#8A1C3C"), rgb("#FBEFF2")),
+)
+
+// Kasten: vom Lua-Filter aus GitHub-Alert-Syntax erzeugt
+#let kasten(typ: "merke", titel: none, body) = {
+  let (strich, fuellung) = kasten-farben.at(typ, default: kasten-farben.merke)
+  block(
+    width: 100%, fill: fuellung, stroke: (left: 3.5pt + strich),
+    inset: (left: 12pt, right: 11pt, top: 9pt, bottom: 9pt),
+    above: 11pt, below: 13pt, breakable: true,
+  )[
+    #set text(font: sans, size: 10pt, fill: textfarbe)
+    #set par(justify: false, leading: 0.55em, spacing: 0.75em)
+    #if titel != none {
+      block(below: 7pt, sticky: true, text(fill: strich, weight: "bold", size: 8.6pt,
+        tracking: 0.08em, upper(titel)))
+    }
+    #body
+  ]
+}
+
+#let horizontalrule = line(length: 100%, stroke: 0.5pt + linie)
+
+// Quellenzeile unter Tabellen und Abbildungen („Quelle: …“, vom Lua-Filter markiert)
+#let quellenzeile(body) = block(width: 100%, above: 5pt, below: 14pt)[
+  #set text(font: sans, size: 8.3pt, fill: grau)
+  #set par(justify: false, leading: 0.5em)
+  #body
+]
+
+// Vermerke im Text: [LÜCKE: …] und [MODELL: …] (vom Lua-Filter erkannt); hinterlegt, umbrechbar
+#let vermerk-farben = (
+  luecke: (rgb("#8C4A00"), rgb("#FCEFDC")),
+  modell: (rgb("#5B4B8A"), rgb("#EEEAF7")),
+)
+#let vermerk(typ: "luecke", body) = {
+  let (schrift, grund) = vermerk-farben.at(typ, default: vermerk-farben.luecke)
+  let label = if typ == "modell" [Modellwert ausstehend:] else [Lücke:]
+  highlight(fill: grund, top-edge: "ascender", bottom-edge: "descender", extent: 1.2pt, radius: 1.5pt)[#text(font: sans, size: 0.92em, fill: schrift)[#text(weight: "bold")[#label] #body]]
+}
+
+$if(highlighting-definitions)$
+$highlighting-definitions$
+$endif$
+
+// ---------------------------------------------------------------------------
+// Dokument
+// ---------------------------------------------------------------------------
+#set document(
+$if(title)$
+  title: [$title$],
+$endif$
+$if(author)$
+  author: ($for(author)$"$author$"$sep$, $endfor$),
+$endif$
+)
+
+#set text(font: serif, size: 10.5pt, lang: "de", region: "DE", fill: textfarbe, hyphenate: true)
+#set par(justify: true, leading: 0.62em, spacing: 0.95em, linebreaks: "optimized")
+#set smartquote(enabled: false)
+#show link: set text(fill: akzent)
+#show raw: set text(font: mono, size: 8.8pt)
+#show raw.where(block: true): block.with(fill: rgb("#F5F6F8"), inset: 8pt, width: 100%)
+
+#set list(indent: 0.3em, body-indent: 0.55em, spacing: 0.55em, marker: ([•], [–], [·]))
+#set enum(indent: 0.3em, body-indent: 0.55em, spacing: 0.55em)
+#show list: set par(justify: false)
+#show enum: set par(justify: false)
+
+#set footnote.entry(separator: line(length: 30%, stroke: 0.5pt + grau), gap: 0.5em)
+#show footnote.entry: set text(size: 8.5pt)
+#show footnote.entry: set par(justify: false)
+
+#show quote.where(block: true): it => block(
+  inset: (left: 12pt, top: 2pt, bottom: 2pt), stroke: (left: 2pt + linie),
+  text(fill: rgb("#3A4452"), it.body))
+
+// Inhalt als reiner Text (für den Kolumnentitel)
+#let klartext(c) = {
+  if type(c) == str { c }
+  else if c == none { "" }
+  else if c.has("text") { c.text }
+  else if c.has("children") { c.children.map(klartext).join("") }
+  else if c.has("body") { klartext(c.body) }
+  else if c.func() == [ ].func() { " " }
+  else { "" }
+}
+// Kolumnentitel: Kapiteltitel bis zum Doppelpunkt, damit die Kopfzeile einzeilig bleibt
+#let kurztitel(c) = klartext(c).split(":").first().trim()
+
+// Überschriften -------------------------------------------------------------
+#set heading(numbering: "1.1")
+$if(kapitel-offset)$
+#counter(heading).update($kapitel-offset$)
+$endif$
+
+#let h1-neue-seite = $if(h1-neue-seite)$true$else$false$endif$
+// Kapiteldateien (nummerierung: kapitelweise): Kapitel beginnt auf neuer Seite mit Kapitelkopf
+#let kapitel-eroeffnung = $if(nummerierung-kapitelweise)$true$else$false$endif$
+
+#show heading: set text(font: sans, fill: navy, hyphenate: false)
+#show heading: set par(justify: false)
+#show heading.where(level: 1): it => {
+  // Gesamtbuch: Teilseite („Teil I – …“), als Überschrift mit Label <teil> für Inhaltsverzeichnis und Lesezeichen
+  if it.at("label", default: none) == <teil> {
+    pagebreak(weak: true)
+    let teile = klartext(it.body).split(" – ")
+    block(width: 100%, above: 0pt, below: 0pt)[
+      #v(6.5cm)
+      #text(size: 12pt, weight: "bold", tracking: 0.22em, fill: akzent)[#upper(teile.first())]
+      #v(6pt)
+      #block(width: 100%, stroke: (top: 1.5pt + akzent), inset: (top: 12pt))[
+        #set text(size: 26pt, weight: "bold")
+        #set par(leading: 0.42em)
+        #teile.slice(1).join(" – ")
+      ]
+    ]
+    pagebreak()
+    return
+  }
+  if h1-neue-seite or kapitel-eroeffnung { pagebreak(weak: true) }
+  // bei kapitelweiser Nummerierung: Zähler für Tabellen und Abbildungen je Kapitel zurücksetzen
+  $if(nummerierung-kapitelweise)$
+  counter(figure.where(kind: table)).update(0)
+  counter(figure.where(kind: image)).update(0)
+  $endif$
+  if kapitel-eroeffnung and it.numbering != none {
+    block(width: 100%, above: 0pt, below: 22pt, sticky: true)[
+      #v(1.1cm)
+      #text(size: 10pt, weight: "bold", tracking: 0.16em, fill: akzent)[KAPITEL #counter(heading).display("1")]
+      #v(3pt)
+      #block(width: 100%, stroke: (bottom: 1.5pt + akzent), inset: (bottom: 10pt))[
+        #set text(size: 23pt, weight: "bold")
+        #set par(leading: 0.42em)
+        #it.body
+      ]
+    ]
+  } else {
+    block(width: 100%, above: 8pt, below: 16pt, sticky: true,
+      stroke: (bottom: 1.5pt + akzent), inset: (bottom: 7pt))[
+      #set text(size: 18pt, weight: "bold")
+      #if it.numbering != none { counter(heading).display(it.numbering); h(0.55em) }
+      #it.body
+    ]
+  }
+}
+#show heading.where(level: 2): it => block(above: 18pt, below: 8pt, sticky: true)[
+  #set text(size: 13.5pt, weight: "bold")
+  #if it.numbering != none { counter(heading).display(it.numbering); h(0.5em) }
+  #it.body
+]
+#show heading.where(level: 3): it => block(above: 13pt, below: 6pt, sticky: true)[
+  #set text(size: 11.5pt, weight: "bold", fill: akzent)
+  #if it.numbering != none { counter(heading).display(it.numbering); h(0.45em) }
+  #it.body
+]
+#show heading.where(level: 4): it => block(above: 11pt, below: 4pt, sticky: true)[
+  #set text(size: 10.5pt, weight: "bold", style: "italic")
+  #it.body
+]
+
+// Abbildungen und Tabellen ---------------------------------------------------
+#let kapitelnummer() = counter(heading).get().first()
+// Gesamtbuch: im Anhang „Tabelle A.1“ statt Kapitelnummer (vom Buch-Skript mit #anhang-buchstabe.update("A") gesetzt)
+#let anhang-buchstabe = state("anhang-buchstabe", none)
+#set figure(numbering: n => {
+  let a = anhang-buchstabe.get()
+  if a != none { return a + "." + str(n) }
+  let k = counter(heading).get().first()
+  $if(nummerierung-kapitelweise)$if k > 0 { numbering("1.1", k, n) } else { numbering("1", n) }$else$numbering("1", n)$endif$
+})
+#show figure.where(kind: table): set figure(supplement: [Tabelle])
+#show figure.where(kind: image): set figure(supplement: [Abbildung])
+#show figure.where(kind: table): set figure.caption(position: top)
+#show figure.where(kind: image): set figure.caption(position: bottom)
+#show figure: set block(breakable: true)
+#show figure: set block(above: 12pt, below: 6pt)
+#show figure.caption: it => {
+  set text(font: sans, size: 9.3pt, fill: navy)
+  set par(justify: false)
+  // sticky: Beschriftung über Tabellen bleibt bei Seitenumbruch bei der Tabelle
+  block(width: 100%, above: 5pt, below: 5pt, sticky: true, align(left)[
+    #strong[#it.supplement~#context it.counter.display(it.numbering):] #it.body
+  ])
+}
+#set image(width: 100%)
+
+#set table(
+  inset: (x: 5.5pt, y: 4pt),
+  stroke: (x, y) => (bottom: 0.4pt + linie),
+  fill: (x, y) => if y == 0 { navy } else if calc.even(y) { band } else { none },
+)
+#set table.hline(stroke: 0pt)
+#show table.cell.where(y: 0): set text(fill: white, weight: "bold")
+#show table.cell: set par(justify: false, leading: 0.5em)
+#show table: set text(font: sans, size: 9pt)
+#show table: it => block(width: 100%, stroke: (top: 1.2pt + navy, bottom: 1.2pt + navy), it)
+
+// Seite: Kopf- und Fußzeile ---------------------------------------------------
+#let kopf-links = [$if(kopfzeile-links)$$kopfzeile-links$$else$Lehrbuch$endif$]
+#let kopf-rechts-fest = [$if(kopfzeile-rechts)$$kopfzeile-rechts$$endif$]
+#let fuss-links = [$if(fusszeile-links)$$fusszeile-links$$else$$if(date)$Fassung vom $date$ – k$else$K$endif$eine Rechts-, Steuer- oder Anlageberatung$endif$]
+#let kolumne-kapitel = $if(kolumnentitel-kapitel)$true$else$false$endif$
+
+
+#set page(
+  paper: "a4",
+  margin: (top: 2.7cm, bottom: 2.4cm, left: 2.5cm, right: 2.3cm),
+  header-ascent: 35%,
+  footer-descent: 35%,
+  header: context {
+    if kapitel-eroeffnung and query(heading.where(level: 1)).any(h => h.location().page() == here().page()) {
+      return
+    }
+    set text(font: sans, size: 8.3pt, fill: grau)
+    let rechts = kopf-rechts-fest
+    if kolumne-kapitel {
+      let vorher = query(heading.where(level: 1).before(here()))
+      if vorher.len() > 0 {
+        let h = vorher.last()
+        rechts = if h.numbering != none [Kapitel #counter(heading).at(h.location()).first() · #kurztitel(h.body)] else [#kurztitel(h.body)]
+      }
+    }
+    block(width: 100%, stroke: (bottom: 0.5pt + linie), inset: (bottom: 4pt))[
+      #upper(text(tracking: 0.06em, size: 7.6pt, kopf-links)) #h(1fr) #rechts
+    ]
+  },
+  footer: context {
+    set text(font: sans, size: 8pt, fill: grau)
+    [#fuss-links #h(1fr) Seite #text(fill: navy, weight: "bold")[#counter(page).display()] von #counter(page).final().first()]
+  },
+)
+
+// ---------------------------------------------------------------------------
+// Deckblatt und Inhaltsverzeichnis
+// ---------------------------------------------------------------------------
+$if(title)$
+#page(header: none, footer: none)[
+  #v(3.2cm)
+  #line(length: 100%, stroke: 4.5pt + navy)
+  #v(0.9cm)
+  // „Kapitel n ·“ bzw. „Anhang X ·“ nicht umbrechen (sonst steht „Kapitel“ allein in der ersten Zeile)
+  #block({
+    show regex("(Kapitel|Anhang) [0-9A-Z]+ ·"): it => box(it)
+    par(justify: false, text(font: sans, size: 27pt, weight: "bold", fill: navy, hyphenate: false)[$title$])
+  })
+  $if(subtitle)$
+  #v(0.25cm)
+  #block(par(justify: false, text(font: sans, size: 15pt, fill: akzent, hyphenate: false)[$subtitle$]))
+  $endif$
+  #v(1.2cm)
+  $if(author)$
+  #text(font: sans, size: 11.5pt, weight: "bold")[$for(author)$$author$$sep$, $endfor$] \
+  $endif$
+  $if(date)$
+  #text(font: sans, size: 11pt, fill: grau)[$date$]
+  $endif$
+  $if(deckblatt-zeilen)$
+  #v(0.9cm)
+  #set text(font: sans, size: 10pt)
+  #grid(columns: (4.2cm, 1fr), row-gutter: 0.55em,
+  $for(deckblatt-zeilen)$
+    [*$deckblatt-zeilen.k$*], [$deckblatt-zeilen.v$],
+  $endfor$
+  )
+  $endif$
+  $if(deckblatt-hinweis)$
+  #v(1fr)
+  #block(width: 100%, stroke: (top: 0.5pt + linie), inset: (top: 7pt),
+    text(font: sans, size: 8.5pt, style: "italic", fill: grau)[$deckblatt-hinweis$])
+  $endif$
+]
+$endif$
+
+$if(inhaltsverzeichnis)$
+#page[
+  #set par(justify: false)
+  #block(width: 100%, below: 14pt, stroke: (bottom: 1.5pt + akzent), inset: (bottom: 7pt),
+    text(font: sans, size: 18pt, weight: "bold", fill: navy)[Inhaltsverzeichnis])
+  #show outline.entry: set text(font: sans, size: 10pt)
+  #show outline.entry.where(level: 1): it => {
+    if it.element.at("label", default: none) == <teil> {
+      block(above: 16pt, below: 4pt, text(size: 9pt, weight: "bold", tracking: 0.12em, fill: akzent, upper(it.element.body)))
+    } else {
+      set text(weight: "bold", fill: navy)
+      block(above: 9pt, it)
+    }
+  }
+  #outline(title: none, depth: $if(toc-tiefe)$$toc-tiefe$$else$2$endif$, indent: auto)
+]
+$endif$
+
+// Stichwortverzeichnis (Gesamtbuch): Der Lua-Filter setzt vor Fundstellen #metadata("Begriff")<stichwort>.
+// Ausgabe zweispaltig, alphabetisch (Umlaute wie Grundbuchstaben), Seitenzahlen ohne Wiederholung.
+#let sortierschluessel(s) = {
+  let k = lower(s)
+  for (u, e) in (("ä", "a"), ("ö", "o"), ("ü", "u"), ("ß", "ss"), ("§ ", ""), ("„", ""), ("“", "")) { k = k.replace(u, e) }
+  k
+}
+#let stichwortverzeichnis() = context {
+  let marken = query(<stichwort>)
+  let seiten = (:)
+  for m in marken {
+    let w = m.value
+    let s = counter(page).at(m.location()).first()
+    let liste = seiten.at(w, default: ())
+    if s not in liste { liste.push(s) }
+    seiten.insert(w, liste)
+  }
+  let woerter = seiten.keys().sorted(key: sortierschluessel)
+  set text(font: sans, size: 8.6pt)
+  set par(justify: false, leading: 0.45em, spacing: 0.32em, hanging-indent: 1em)
+  columns(2, gutter: 14pt, {
+    let letzter = none
+    for w in woerter {
+      let b = upper(sortierschluessel(w).clusters().first())
+      if b != letzter {
+        block(above: 9pt, below: 4pt, sticky: true, text(size: 10.5pt, weight: "bold", fill: navy, b))
+        letzter = b
+      }
+      par[#w #h(0.4em) #text(fill: grau)[#seiten.at(w).map(str).join(", ")]]
+    }
+  })
+}
+
+$for(header-includes)$
+$header-includes$
+$endfor$
+
+$body$

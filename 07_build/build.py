@@ -56,12 +56,18 @@ def standard_metadaten(ordner: Path) -> Path:
 
 
 def pandoc_bin() -> str:
-    exe = shutil.which("pandoc")
-    if exe:
-        return exe
-    import pypandoc  # type: ignore
+    # Vorrang hat das Pandoc aus pypandoc_binary (Version über requirements.txt festgelegt): Ältere
+    # System-Pandocs (z. B. 3.1.3) setzen Tabellen mit Beschriftung nicht als Typst-Figure, dann fehlen
+    # Tabellennummer und Beschriftung über der Tabelle.
+    try:
+        import pypandoc  # type: ignore
 
-    return pypandoc.get_pandoc_path()
+        return pypandoc.get_pandoc_path()
+    except (ImportError, OSError):
+        exe = shutil.which("pandoc")
+        if exe:
+            return exe
+        raise
 
 
 def read_meta(inputs: list[Path]) -> dict:

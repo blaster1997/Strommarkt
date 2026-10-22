@@ -1,7 +1,7 @@
 ---
 title: "Glossar"
 subtitle: "Der Strommarkt in Deutschland"
-date: "TT.MM.JJJJ"
+date: "22.10.2026"
 kopfzeile-rechts: "Glossar"
 ---
 

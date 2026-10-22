@@ -109,7 +109,9 @@ Einordnungen, die kein Befund sind, als „Einordnung“ oder „Einschätzung�
 Jedes Lieferobjekt (Agenda, Kapitel, Buch, Berichte) wird aus Markdown mit `07_build/build.py` gesetzt und als
 **PDF** ausgeliefert (Pandoc → Typst, ohne Word; `--engine docx` nur als Rückfallebene); das Gesamtbuch mit
 `07_build/buch.py`. Vor Übergabe visuell prüfen (`07_build/preview.py`). Ein vollständiges Beispiel aller
-Elemente steht in `07_build/muster/formatmuster.md`.
+Elemente steht in `07_build/muster/formatmuster.md`; das Referenz-PDF dazu liegt unter `ansicht/Formatmuster.pdf`.
+Der Satz nutzt das Pandoc aus `pypandoc_binary` (Version 3.9 am 22.10.2026), nicht ein älteres System-Pandoc
+(D-003): Nur damit erhalten Tabellen Nummer und Beschriftung über der Tabelle.
 
 **Markdown-Konventionen**
 
@@ -157,7 +159,8 @@ einzelnen Dokumenten. Buchspezifische Angaben (Titel, Teile, Deckblatt, Stand, v
 ```
 /00_input            Eingaben (nicht verändern); vorprojekt_bess/, vertraulich/
 /01_agenda           AGENDA_VORSCHLAG.md (+ .pdf), freigegebene AGENDA.md
-/02_research         RESEARCH_PLAN.md, <Kapitel-ID>/notizen_*.md, SYNTHESE.md, W0_verifikation/
+/02_research         RESEARCH_PLAN.md, <Kapitel-ID>/notizen_*.md, SYNTHESE.md, W0_verifikation/,
+                     P1_vorab/ (Vorabstand für die Agenda), 00_unterlagen/ (Analysen vertraulicher Unterlagen)
 /03_chapters         <nn>_<slug>.md (ein Kapitel je Datei), vorwort.md, anhang_*.md
 /04_models           m1_meritorder/, m2_erneuerbare/, m3_beschaffung/, m4_netz_endkunde/, daten/
 /05_figures          Abbildungen je Kapitel (Skript, Daten, Bild, Beschriftung)
@@ -190,6 +193,13 @@ CLAUDE.md  PROGRESS.md  DECISIONS.md  ANNAHMEN.md  GLOSSAR.md
   gekennzeichnete Annahme.
 - Der Orchestrator committet nach jedem abgeschlossenen Schritt mit einer klaren Nachricht und hält `PROGRESS.md`
   aktuell.
+- Aufruf der Agenten: Stehen die Rollen aus `.claude/agents/` in einer Sitzung nicht als eigener Subagent-Typ zur
+  Verfügung (etwa wenn die Sitzung außerhalb der Projektwurzel gestartet wurde), beauftragt der Orchestrator einen
+  allgemeinen Agenten mit dem Hinweis, die Rollenbeschreibung `.claude/agents/<rolle>.md` zu lesen und danach zu
+  arbeiten. Die Rollenbeschreibung gilt dann wie ein Systemprompt, einschließlich der Werkzeuggrenzen.
+- Erreichbarkeit (Stand 22.10.2026, Umgebung Claude Code im Web): gesetze-im-internet.de war per curl aus dem
+  Container nicht erreichbar, epexspot.com lehnt automatisierte Abrufe ab (403). Normtext dann über WebFetch,
+  recht.bund.de (Bundesgesetzblatt) oder dip.bundestag.de prüfen; Börsendaten über SMARD oder energy-charts.
 
 ## 8 Vertraulichkeit eigener Unterlagen (U1 …)
 
